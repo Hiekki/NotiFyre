@@ -32,7 +32,7 @@ export default class Add extends Command<NotiFyre> {
             if (!commandData.user.timezone) {
                 return await ErrorMessage(
                     command,
-                    'You have not set your timezone. Please use the `/timezone` command to set your timezone.',
+                    'You have not set your timezone. Please use the /timezone command to set your timezone.',
                     true,
                 );
             }
@@ -63,22 +63,27 @@ export default class Add extends Command<NotiFyre> {
                 webhook = await caller.database.webhook.get(commandData.user.webhookID);
             }
 
+            let isChrono = true;
+
             const rawTime = command.getRequiredString('time');
             const reminder = command.getRequiredString('reminder');
+
             let chronoTime = chrono.parseDate(rawTime);
             if (!chronoTime) {
+                isChrono = false;
                 try {
-                    const userTime = timestring(rawTime) * 1000;
-                    chronoTime = new Date(new Date().getTime() + userTime + 1000);
+                    const time = timestring(rawTime) * 1000;
+                    chronoTime = new Date(new Date().getTime() + time + 1000);
                 } catch (error) {
                     return await ErrorMessage(command, 'Failed to parse time.\nPlease use a valid time and date.', true);
                 }
             }
 
-            const utcTime = moment.utc(chronoTime);
-            const time = utcTime.clone().tz(commandData.user.timezone);
+            let userTime: moment.Moment;
+            if (isChrono) userTime = moment(chronoTime).tz(commandData.user.timezone, true);
+            else userTime = moment(chronoTime);
 
-            if (time.isBefore(moment.tz(commandData.user.timezone))) {
+            if (userTime.toISOString() < new Date().toISOString()) {
                 return await ErrorMessage(command, 'The reminder time has already passed.\nPlease use a future time and date.', true);
             }
 
@@ -86,7 +91,7 @@ export default class Add extends Command<NotiFyre> {
                 user: { connect: { id: commandData.user.id } },
                 content: reminder,
                 rawTime: rawTime,
-                endsAt: time.toDate(),
+                endsAt: userTime.toDate(),
                 recurring: false,
                 channelID: channelID,
             });
@@ -102,12 +107,12 @@ export default class Add extends Command<NotiFyre> {
                         fields: [
                             {
                                 name: 'Time to Remind',
-                                value: `<t:${time.unix()}:f>`,
+                                value: `<t:${userTime.unix()}:f>`,
                                 inline: true,
                             },
                             {
                                 name: 'Remaining Time',
-                                value: `<t:${time.unix()}:R>`,
+                                value: `<t:${userTime.unix()}:R>`,
                                 inline: true,
                             },
                             {
