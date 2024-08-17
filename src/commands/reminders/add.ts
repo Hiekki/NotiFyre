@@ -3,7 +3,7 @@ import NotiFyre from '../../Bot';
 import { MiddleWareType } from '../../types/MiddleWare';
 import { ErrorMessage, MissingPermissionsMessage } from '../../utils/message';
 import * as chrono from 'chrono-node';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import timestring from 'timestring';
 import { BotColors, BotEmojis } from '../../utils/constants';
 import { AllPermissions } from '../../types/Permissions';
@@ -68,15 +68,17 @@ export default class Add extends Command<NotiFyre> {
             let chronoTime = chrono.parseDate(rawTime);
             if (!chronoTime) {
                 try {
-                    const time = timestring(rawTime) * 1000;
-                    chronoTime = new Date(new Date().getTime() + time + 1000);
+                    const userTime = timestring(rawTime) * 1000;
+                    chronoTime = new Date(new Date().getTime() + userTime + 1000);
                 } catch (error) {
                     return await ErrorMessage(command, 'Failed to parse time.\nPlease use a valid time and date.', true);
                 }
             }
 
-            const time = moment(chronoTime).tz(commandData.user.timezone);
-            if (time.toISOString() < new Date().toISOString()) {
+            const utcTime = moment.utc(chronoTime);
+            const time = utcTime.clone().tz(commandData.user.timezone);
+
+            if (time.isBefore(moment.tz(commandData.user.timezone))) {
                 return await ErrorMessage(command, 'The reminder time has already passed.\nPlease use a future time and date.', true);
             }
 
