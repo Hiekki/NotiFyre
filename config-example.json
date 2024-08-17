@@ -1,0 +1,15 @@
+{
+    "name": "Bot",
+    "script": "./dist/Bot.js",
+    "args": ["--color"],
+    "TOKEN": "BOT_TOKEN",
+    "ADMINS": ["ADMIN_USERID"],
+    "CHANNEL": {
+        "STATUS": "CHANNELID",
+        "GUILD": "CHANNELID",
+        "ERROR": "CHANNELID"
+    },
+    "DEV": true,
+    "FORCE_DEPLOY": false,
+    "DEV_GUILD": "GUILDID"
+}
