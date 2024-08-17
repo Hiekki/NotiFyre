@@ -25,6 +25,7 @@
         "bullmq": "^5.12.8",
         "chrono-node": "^2.7.6",
         "dotenv": "^16.4.5",
+        "fires-utils": "^0.1.2",
         "ioredis": "^5.4.1",
         "logger": "^1.0.6",
         "luxon": "^3.5.0",
