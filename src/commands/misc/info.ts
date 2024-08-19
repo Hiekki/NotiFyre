@@ -28,12 +28,12 @@ export default class Info extends Command<NotiFyre> {
                             },
                             {
                                 name: 'Bot Version',
-                                value: process.env.npm_package_version ?? 'N/A',
+                                value: process.env.npm_package_version ? `v${process.env.npm_package_version}` : 'N/A',
                                 inline: true,
                             },
                             {
-                                name: 'DB Guilds',
-                                value: numeral((await caller.database.guild.all()).length).format('0,0'),
+                                name: 'Guilds',
+                                value: numeral(caller.bot.guilds.size).format('0,0'),
                                 inline: true,
                             },
                             {

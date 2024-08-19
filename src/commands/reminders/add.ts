@@ -25,7 +25,6 @@ export default class Add extends Command<NotiFyre> {
             required: true,
             max_length: 1000,
         });
-
     async handleCommand(caller: NotiFyre, command: CommandInteraction, commandData: MiddleWareType) {
         try {
             if (!commandData.user) return;
@@ -69,19 +68,27 @@ export default class Add extends Command<NotiFyre> {
             const reminder = command.getRequiredString('reminder');
 
             let chronoTime = chrono.parseDate(rawTime);
+
             if (!chronoTime) {
                 isChrono = false;
                 try {
                     const time = timestring(rawTime) * 1000;
                     chronoTime = new Date(new Date().getTime() + time + 1000);
-                } catch (error) {
+                } catch {
                     return await ErrorMessage(command, 'Failed to parse time.\nPlease use a valid time and date.', true);
                 }
             }
 
             let userTime: moment.Moment;
-            if (isChrono) userTime = moment(chronoTime).tz(commandData.user.timezone, true);
-            else userTime = moment(chronoTime);
+            if (isChrono) {
+                userTime = moment(chronoTime).tz(commandData.user.timezone, true);
+
+                const dayDifference = moment().tz(commandData.user.timezone).dayOfYear() - moment().dayOfYear();
+                if (Math.abs(dayDifference) > 1) {
+                    if (dayDifference > 0) userTime.subtract(1, 'days');
+                    else userTime.add(1, 'days');
+                } else userTime.add(dayDifference, 'days');
+            } else userTime = moment(chronoTime);
 
             if (userTime.toISOString() < new Date().toISOString()) {
                 return await ErrorMessage(command, 'The reminder time has already passed.\nPlease use a future time and date.', true);

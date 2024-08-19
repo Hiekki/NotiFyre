@@ -1,6 +1,6 @@
 {
     "name": "notifyre",
-    "version": "1.0.0",
+    "version": "1.0.8",
     "description": "NotiFyre, for reminders and notifications",
     "main": "index.js",
     "scripts": {
