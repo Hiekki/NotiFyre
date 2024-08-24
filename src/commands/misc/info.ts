@@ -57,6 +57,9 @@ export default class Info extends Command<NotiFyre> {
                                 value: 'Hiekki\nFire\nAzorant',
                             },
                         ],
+                        footer: {
+                            text: `Uptime: ${caller.parsing.accountAge(Date.now() - process.uptime() * 1000)}`,
+                        },
                     },
                 ],
                 flags: Constants.MessageFlags.Ephemeral,
