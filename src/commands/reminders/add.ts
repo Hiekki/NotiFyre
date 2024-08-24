@@ -67,8 +67,10 @@ export default class Add extends Command<NotiFyre> {
             const rawTime = command.getRequiredString('time');
             const reminder = command.getRequiredString('reminder');
 
-            let chronoTime = chrono.parseDate(rawTime);
+            let userTZOffset = moment().tz(commandData.user.timezone).utcOffset();
+            const serverTime = moment().add(userTZOffset, 'minutes').toDate();
 
+            let chronoTime = chrono.parseDate(rawTime, serverTime);
             if (!chronoTime) {
                 isChrono = false;
                 try {
@@ -79,16 +81,10 @@ export default class Add extends Command<NotiFyre> {
                 }
             }
 
-            let userTime: moment.Moment;
-            if (isChrono) {
-                userTime = moment(chronoTime).tz(commandData.user.timezone, true);
+            userTZOffset = moment(chronoTime).tz(commandData.user.timezone).utcOffset();
+            let userTime: moment.Moment = moment(chronoTime);
 
-                const dayDifference = moment().tz(commandData.user.timezone).dayOfYear() - moment().dayOfYear();
-                if (Math.abs(dayDifference) > 1) {
-                    if (dayDifference > 0) userTime.subtract(1, 'days');
-                    else userTime.add(1, 'days');
-                } else userTime.add(dayDifference, 'days');
-            } else userTime = moment(chronoTime);
+            if (isChrono) userTime.subtract(userTZOffset, 'minutes');
 
             if (userTime.toISOString() < new Date().toISOString()) {
                 return await ErrorMessage(command, 'The reminder time has already passed.\nPlease use a future time and date.', true);
